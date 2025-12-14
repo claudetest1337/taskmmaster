@@ -51,6 +51,15 @@ export const authApi = {
   logout: () => api.post('/auth/logout'),
 };
 
+// Notification preferences interface
+export interface NotificationPreferences {
+  taskAssignments: boolean;
+  taskCompletions: boolean;
+  achievementUnlocked: boolean;
+  teamUpdates: boolean;
+  weeklyDigest: boolean;
+}
+
 // User preferences interface
 export interface UserPreferences {
   theme: string;
@@ -60,6 +69,7 @@ export interface UserPreferences {
   animations: boolean;
   glassOpacity: number;
   starBrightness: number;
+  notifications?: NotificationPreferences;
 }
 
 // Users API
@@ -238,34 +248,38 @@ export const securityApi = {
   getEvents: (params?: { limit?: number; type?: string; severity?: string }) =>
     api.get('/security/events', { params }),
 
-  getIpReputation: (ip: string) => api.get(`/security/ip/${ip}`),
+  getIpReputation: (ip: string) => api.get(`/security/ip/${ip}/reputation`),
 
   blockIp: (ip: string, reason?: string, duration?: number) =>
-    api.post('/security/ip/block', { ip, reason, duration }),
+    api.post('/security/ip/blacklist', { ip, reason, durationSeconds: duration }),
 
-  unblockIp: (ip: string) => api.delete(`/security/ip/block/${ip}`),
+  unblockIp: (ip: string) => api.delete(`/security/ip/blacklist/${encodeURIComponent(ip)}`),
 
   whitelistIp: (ip: string, reason?: string) =>
-    api.post('/security/ip/whitelist', { ip, reason }),
+    api.post('/security/ip/whitelist', { ip }),
 
-  removeWhitelist: (ip: string) => api.delete(`/security/ip/whitelist/${ip}`),
+  removeWhitelist: (ip: string) => api.delete(`/security/ip/whitelist/${encodeURIComponent(ip)}`),
 
-  getBlockedIps: () => api.get('/security/ip/blocked'),
+  getBlockedIps: () => api.get('/security/ip/blacklist'),
 
-  getWhitelistedIps: () => api.get('/security/ip/whitelisted'),
+  getWhitelistedIps: () => api.get('/security/ip/whitelist'),
 
   getLockedAccounts: () => api.get('/security/accounts/locked'),
 
   unlockAccount: (email: string) =>
-    api.post('/security/accounts/unlock', { email }),
+    api.post('/security/account/unlock', { email }),
 
-  setProtectionLevel: (level: number) =>
-    api.post('/security/protection-level', { level }),
+  setProtectionLevel: (level: number, reason: string = 'Admin action') =>
+    api.post('/security/protection-level', { level, reason }),
 
   setCaptchaMode: (enabled: boolean, global?: boolean) =>
-    api.post('/security/captcha', { enabled, global }),
+    enabled && global
+      ? api.post('/security/captcha/enable-global')
+      : !enabled
+      ? api.post('/security/captcha/disable-global')
+      : api.post('/security/captcha/enable-global'),
 
-  getMetrics: () => api.get('/security/metrics'),
+  getMetrics: () => api.get('/security/metrics/traffic'),
 };
 
 export default api;

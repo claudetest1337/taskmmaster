@@ -109,6 +109,7 @@ export default function SecurityDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'ips' | 'accounts'>('overview');
 
   // Dashboard data
@@ -132,10 +133,21 @@ export default function SecurityDashboardPage() {
       setDashboard(response.data.data);
       setEvents(response.data.data.recentEvents || []);
       setError(null);
-    } catch (err) {
+      setAccessDenied(false);
+    } catch (err: any) {
       console.error('Failed to fetch security dashboard:', err);
+
+      // Check if access denied (403 Forbidden)
+      if (err.response?.status === 403) {
+        setAccessDenied(true);
+        setError('Access denied. Admin privileges required.');
+        setIsLoading(false);
+        setIsRefreshing(false);
+        return;
+      }
+
       setError('Failed to load security dashboard');
-      // Use mock data for development
+      // Use mock data for development/demo
       setDashboard({
         protectionLevel: 0,
         activeThreats: 3,
@@ -347,6 +359,30 @@ export default function SecurityDashboardPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <Loader2 className="w-8 h-8 animate-spin text-cosmic-purple" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show access denied page for non-admin users
+  if (accessDenied) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center h-96 text-center">
+          <div className="w-20 h-20 rounded-full bg-status-error/20 flex items-center justify-center mb-6">
+            <ShieldOff className="w-10 h-10 text-status-error" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <p className="text-gray-400 max-w-md mb-6">
+            You don't have permission to access the Security Dashboard.
+            This page is restricted to administrators only.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => window.history.back()}
+          >
+            Go Back
+          </Button>
         </div>
       </DashboardLayout>
     );

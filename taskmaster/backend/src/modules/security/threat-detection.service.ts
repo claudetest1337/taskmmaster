@@ -434,6 +434,42 @@ export class ThreatDetectionService {
   }
 
   /**
+   * Get all blacklisted IPs
+   */
+  async getBlacklistedIps(): Promise<Array<{ ip: string; reason: string; blockedAt: string; expiresAt?: string }>> {
+    try {
+      // Get permanently blacklisted IPs from hash
+      const permanentList = await redis.hgetall(REDIS_KEYS.ipBlacklist);
+      const result: Array<{ ip: string; reason: string; blockedAt: string; expiresAt?: string }> = [];
+
+      for (const [ip, reason] of Object.entries(permanentList || {})) {
+        result.push({
+          ip,
+          reason,
+          blockedAt: new Date().toISOString(), // Approximate since we don't store timestamp
+        });
+      }
+
+      return result;
+    } catch (error) {
+      logger.error({ error }, 'Failed to get blacklisted IPs');
+      return [];
+    }
+  }
+
+  /**
+   * Get all whitelisted IPs
+   */
+  async getWhitelistedIps(): Promise<string[]> {
+    try {
+      return await redis.smembers(REDIS_KEYS.ipWhitelist);
+    } catch (error) {
+      logger.error({ error }, 'Failed to get whitelisted IPs');
+      return [];
+    }
+  }
+
+  /**
    * Get IP reputation
    */
   async getIpReputation(ip: string): Promise<IpReputation | null> {

@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useAuthStore, useAuthHydration } from '@/stores/auth.store';
-import { useSettingsStore, themes, Theme, languages, Language, timezones, detectTimezone } from '@/stores/settings.store';
+import { useSettingsStore, themes, Theme, languages, Language, timezones, detectTimezone, NotificationPreferences } from '@/stores/settings.store';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -40,6 +40,7 @@ export default function SettingsPage() {
     animations,
     glassOpacity,
     starBrightness,
+    notifications,
     setTheme,
     setLanguage,
     setTimezone,
@@ -47,6 +48,7 @@ export default function SettingsPage() {
     setAnimations,
     setGlassOpacity,
     setStarBrightness,
+    setNotification,
     getCurrentTheme,
   } = useSettingsStore();
   const t = useTranslation();
@@ -62,6 +64,9 @@ export default function SettingsPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const saveProfileTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync form state with user data when it changes
   useEffect(() => {
@@ -71,6 +76,44 @@ export default function SettingsPage() {
       setEmail(user.email || '');
     }
   }, [user]);
+
+  // Auto-save profile with debounce
+  const saveProfileDebounced = useRef((newFirstName: string, newLastName: string) => {
+    if (saveProfileTimeoutRef.current) {
+      clearTimeout(saveProfileTimeoutRef.current);
+    }
+    saveProfileTimeoutRef.current = setTimeout(async () => {
+      if (!user?.id) return;
+      // Only save if values changed
+      if (newFirstName === user.firstName && newLastName === user.lastName) return;
+
+      setIsSavingProfile(true);
+      try {
+        const { usersApi } = await import('@/lib/api');
+        await usersApi.update(user.id, {
+          firstName: newFirstName,
+          lastName: newLastName,
+        });
+        setProfileSaved(true);
+        setTimeout(() => setProfileSaved(false), 2000);
+        // Refresh user data
+        fetchUser();
+      } catch (error) {
+        console.error('Failed to save profile:', error);
+      } finally {
+        setIsSavingProfile(false);
+      }
+    }, 1000);
+  }).current;
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveProfileTimeoutRef.current) {
+        clearTimeout(saveProfileTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Fetch user data if not already loaded
   useEffect(() => {
@@ -221,48 +264,59 @@ export default function SettingsPage() {
                       <label className="text-sm text-gray-400">{t.settings.profile.firstName}</label>
                       <Input
                         value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setFirstName(newValue);
+                          saveProfileDebounced(newValue, lastName);
+                        }}
                         placeholder={authLoading ? 'Loading...' : ''}
-                        disabled={authLoading}
+                        disabled={authLoading || isSavingProfile}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm text-gray-400">{t.settings.profile.lastName}</label>
                       <Input
                         value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          setLastName(newValue);
+                          saveProfileDebounced(firstName, newValue);
+                        }}
                         placeholder={authLoading ? 'Loading...' : ''}
-                        disabled={authLoading}
+                        disabled={authLoading || isSavingProfile}
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <label className="text-sm text-gray-400">{t.settings.profile.email}</label>
                       <Input
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
                         type="email"
                         placeholder={authLoading ? 'Loading...' : ''}
-                        disabled={authLoading}
+                        disabled={true}
+                        className="opacity-60"
                       />
+                      <p className="text-xs text-gray-500">Email cannot be changed</p>
                     </div>
                   </div>
 
-                  <Button
-                    className="bg-cosmic-purple hover:bg-cosmic-purple/80"
-                    disabled={authLoading}
-                  >
-                    {authLoading ? (
+                  {/* Auto-save status indicator */}
+                  <div className="flex items-center gap-2 text-sm">
+                    {isSavingProfile && (
                       <>
-                        <Loader2 className="mr-2 w-4 h-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 w-4 h-4" />
-                        {t.settings.profile.saveChanges}
+                        <Loader2 className="w-4 h-4 animate-spin text-cosmic-purple" />
+                        <span className="text-gray-400">Saving...</span>
                       </>
                     )}
-                  </Button>
+                    {profileSaved && !isSavingProfile && (
+                      <>
+                        <Check className="w-4 h-4 text-green-500" />
+                        <span className="text-green-500">Saved</span>
+                      </>
+                    )}
+                    {!isSavingProfile && !profileSaved && (
+                      <span className="text-gray-500 text-xs">Changes are saved automatically</span>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -273,20 +327,25 @@ export default function SettingsPage() {
                   <CardTitle>{t.settings.notifications.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { label: t.settings.notifications.taskAssignments, description: t.settings.notifications.taskAssignmentsDesc },
-                    { label: t.settings.notifications.taskCompletions, description: t.settings.notifications.taskCompletionsDesc },
-                    { label: t.settings.notifications.achievementUnlocked, description: t.settings.notifications.achievementUnlockedDesc },
-                    { label: t.settings.notifications.teamUpdates, description: t.settings.notifications.teamUpdatesDesc },
-                    { label: t.settings.notifications.weeklyDigest, description: t.settings.notifications.weeklyDigestDesc },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-glass-light">
+                  {([
+                    { key: 'taskAssignments' as const, label: t.settings.notifications.taskAssignments, description: t.settings.notifications.taskAssignmentsDesc },
+                    { key: 'taskCompletions' as const, label: t.settings.notifications.taskCompletions, description: t.settings.notifications.taskCompletionsDesc },
+                    { key: 'achievementUnlocked' as const, label: t.settings.notifications.achievementUnlocked, description: t.settings.notifications.achievementUnlockedDesc },
+                    { key: 'teamUpdates' as const, label: t.settings.notifications.teamUpdates, description: t.settings.notifications.teamUpdatesDesc },
+                    { key: 'weeklyDigest' as const, label: t.settings.notifications.weeklyDigest, description: t.settings.notifications.weeklyDigestDesc },
+                  ] as const).map((item) => (
+                    <div key={item.key} className="flex items-center justify-between p-4 rounded-xl bg-glass-light">
                       <div>
                         <p className="font-medium">{item.label}</p>
                         <p className="text-sm text-gray-400">{item.description}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                        <input
+                          type="checkbox"
+                          checked={notifications[item.key]}
+                          onChange={(e) => setNotification(item.key, e.target.checked)}
+                          className="sr-only peer"
+                        />
                         <div className="w-11 h-6 bg-gray-600 peer-focus:ring-2 peer-focus:ring-cosmic-purple rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cosmic-purple"></div>
                       </label>
                     </div>

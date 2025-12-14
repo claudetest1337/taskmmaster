@@ -298,6 +298,40 @@ export const securityRoutes: FastifyPluginAsync = async (app) => {
   });
 
   /**
+   * Get all blacklisted IPs
+   */
+  app.get('/ip/blacklist', {
+    schema: {
+      tags: ['Security'],
+      summary: 'Get all blacklisted IPs',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async () => {
+    const blockedIps = await threatDetectionService.getBlacklistedIps();
+    return {
+      success: true,
+      data: blockedIps,
+    };
+  });
+
+  /**
+   * Get all whitelisted IPs
+   */
+  app.get('/ip/whitelist', {
+    schema: {
+      tags: ['Security'],
+      summary: 'Get all whitelisted IPs',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async () => {
+    const whitelistedIps = await threatDetectionService.getWhitelistedIps();
+    return {
+      success: true,
+      data: whitelistedIps,
+    };
+  });
+
+  /**
    * Add IP to whitelist
    */
   app.post('/ip/whitelist', {
@@ -402,6 +436,23 @@ export const securityRoutes: FastifyPluginAsync = async (app) => {
   // ========================================
   // Account Management
   // ========================================
+
+  /**
+   * Get all locked accounts
+   */
+  app.get('/accounts/locked', {
+    schema: {
+      tags: ['Security'],
+      summary: 'Get all locked accounts',
+      security: [{ bearerAuth: [] }],
+    },
+  }, async () => {
+    const lockedAccounts = await bruteForceService.getLockedAccounts();
+    return {
+      success: true,
+      data: lockedAccounts,
+    };
+  });
 
   /**
    * Get account security status

@@ -71,6 +71,9 @@ const REDIS_KEYS = {
 
   // CAPTCHA requirement
   requiresCaptcha: (identifier: string) => `bruteforce:captcha:${identifier}`,
+
+  // Locked accounts tracking (for admin visibility)
+  lockedAccountsList: 'bruteforce:locked:accounts',
 };
 
 // ============================================================================
@@ -360,6 +363,72 @@ export class BruteForceProtectionService {
       logger.info({ event: 'IP_UNLOCKED', ip });
     } catch (error) {
       logger.error({ error, ip }, 'Failed to unlock IP');
+    }
+  }
+
+  /**
+   * Get all locked accounts (for admin dashboard)
+   * Note: Returns only accounts that were tracked via addLockedAccount
+   */
+  async getLockedAccounts(): Promise<Array<{
+    email: string;
+    failedAttempts: number;
+    lockedAt: string;
+    lockoutUntil: string;
+  }>> {
+    try {
+      const lockedAccounts = await redis.hgetall(REDIS_KEYS.lockedAccountsList);
+      const result: Array<{
+        email: string;
+        failedAttempts: number;
+        lockedAt: string;
+        lockoutUntil: string;
+      }> = [];
+
+      for (const [email, dataStr] of Object.entries(lockedAccounts || {})) {
+        try {
+          const data = JSON.parse(dataStr);
+          // Check if still locked
+          if (new Date(data.lockoutUntil) > new Date()) {
+            result.push({
+              email,
+              failedAttempts: data.failedAttempts || 0,
+              lockedAt: data.lockedAt,
+              lockoutUntil: data.lockoutUntil,
+            });
+          } else {
+            // Remove expired entry
+            await redis.hdel(REDIS_KEYS.lockedAccountsList, email);
+          }
+        } catch {
+          // Invalid data, remove it
+          await redis.hdel(REDIS_KEYS.lockedAccountsList, email);
+        }
+      }
+
+      return result;
+    } catch (error) {
+      logger.error({ error }, 'Failed to get locked accounts');
+      return [];
+    }
+  }
+
+  /**
+   * Track a locked account (call this when an account gets locked)
+   */
+  async trackLockedAccount(email: string, failedAttempts: number, lockoutUntil: Date): Promise<void> {
+    try {
+      await redis.hset(
+        REDIS_KEYS.lockedAccountsList,
+        email,
+        JSON.stringify({
+          failedAttempts,
+          lockedAt: new Date().toISOString(),
+          lockoutUntil: lockoutUntil.toISOString(),
+        })
+      );
+    } catch (error) {
+      logger.error({ error, email }, 'Failed to track locked account');
     }
   }
 

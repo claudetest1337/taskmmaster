@@ -265,6 +265,15 @@ export const themes: ThemeConfig[] = [
   },
 ];
 
+// Notification preferences interface
+export interface NotificationPreferences {
+  taskAssignments: boolean;
+  taskCompletions: boolean;
+  achievementUnlocked: boolean;
+  teamUpdates: boolean;
+  weeklyDigest: boolean;
+}
+
 interface SettingsState {
   theme: Theme;
   language: Language;
@@ -273,6 +282,7 @@ interface SettingsState {
   animations: boolean;
   glassOpacity: number; // 0-100
   starBrightness: number; // 0-100
+  notifications: NotificationPreferences;
   _hasHydrated: boolean;
   _userId: string | null; // Track current user for syncing
   _isSyncing: boolean;
@@ -284,6 +294,7 @@ interface SettingsState {
   setAnimations: (enabled: boolean) => void;
   setGlassOpacity: (opacity: number) => void;
   setStarBrightness: (brightness: number) => void;
+  setNotification: (key: keyof NotificationPreferences, value: boolean) => void;
   setHasHydrated: (state: boolean) => void;
   getCurrentTheme: () => ThemeConfig;
   getCurrentLanguage: () => LanguageConfig;
@@ -305,6 +316,15 @@ const debouncedSync = (syncFn: () => Promise<void>) => {
   }, 1000); // Wait 1 second before syncing to reduce API calls
 };
 
+// Default notification preferences
+const DEFAULT_NOTIFICATIONS: NotificationPreferences = {
+  taskAssignments: true,
+  taskCompletions: true,
+  achievementUnlocked: true,
+  teamUpdates: true,
+  weeklyDigest: true,
+};
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
@@ -315,6 +335,7 @@ export const useSettingsStore = create<SettingsState>()(
       animations: true,
       glassOpacity: 50,
       starBrightness: 50,
+      notifications: { ...DEFAULT_NOTIFICATIONS },
       _hasHydrated: false,
       _userId: null,
       _isSyncing: false,
@@ -345,6 +366,12 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setStarBrightness: (brightness) => {
         set({ starBrightness: brightness });
+        debouncedSync(get().syncToServer);
+      },
+      setNotification: (key, value) => {
+        set((state) => ({
+          notifications: { ...state.notifications, [key]: value },
+        }));
         debouncedSync(get().syncToServer);
       },
       setHasHydrated: (state) => set({ _hasHydrated: state }),
@@ -389,6 +416,7 @@ export const useSettingsStore = create<SettingsState>()(
             animations: prefs.animations ?? true,
             glassOpacity: prefs.glassOpacity ?? 50,
             starBrightness: prefs.starBrightness ?? 50,
+            notifications: prefs.notifications ?? { ...DEFAULT_NOTIFICATIONS },
           });
           console.log('Preferences loaded from server:', prefs.theme, prefs.language);
         } catch (error) {
@@ -422,6 +450,7 @@ export const useSettingsStore = create<SettingsState>()(
             animations: state.animations,
             glassOpacity: state.glassOpacity,
             starBrightness: state.starBrightness,
+            notifications: state.notifications,
           });
           console.log('Preferences synced to server:', state.theme, state.language);
         } catch (error) {
@@ -441,6 +470,7 @@ export const useSettingsStore = create<SettingsState>()(
         animations: state.animations,
         glassOpacity: state.glassOpacity,
         starBrightness: state.starBrightness,
+        notifications: state.notifications,
         _userId: state._userId,
       }),
       onRehydrateStorage: () => (state, error) => {

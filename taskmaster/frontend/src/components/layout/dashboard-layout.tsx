@@ -144,6 +144,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
+  // Check if user is admin
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+
   const navigation = [
     { name: t.nav.dashboard, href: '/dashboard', icon: LayoutDashboard },
     { name: t.nav.tasks, href: '/dashboard/tasks', icon: Target },
@@ -153,7 +156,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: t.nav.leaderboard, href: '/dashboard/leaderboard', icon: Trophy },
     { name: t.nav.analytics, href: '/dashboard/analytics', icon: BarChart3 },
     { name: t.nav.aiInsights, href: '/dashboard/ai', icon: Sparkles },
-    { name: t.nav.security || 'Security', href: '/dashboard/security', icon: Shield },
+    // Only show Security Dashboard for admin users
+    ...(isAdmin ? [{ name: t.nav.security || 'Security', href: '/dashboard/security', icon: Shield }] : []),
   ];
 
   const getNotificationIcon = (type: Notification['type']) => {
