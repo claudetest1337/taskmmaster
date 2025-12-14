@@ -130,8 +130,37 @@ export default function SecurityDashboardPage() {
       else setIsLoading(true);
 
       const response = await securityApi.getDashboard();
-      setDashboard(response.data.data);
-      setEvents(response.data.data.recentEvents || []);
+      const data = response.data.data;
+
+      // Transform backend response to match frontend interface
+      // Backend returns protectionLevel as object {level, name, rateLimitMultiplier}
+      const transformedData: SecurityDashboard = {
+        protectionLevel: typeof data.protectionLevel === 'object'
+          ? data.protectionLevel.level
+          : data.protectionLevel ?? 0,
+        activeThreats: data.metrics?.suspiciousIps ?? 0,
+        blockedIps: data.stats?.directory?.blockedIps ?? 0,
+        lockedAccounts: data.stats?.captcha?.captchasServed ?? 0,
+        captchaEnabled: data.stats?.captcha?.globalModeActive ?? false,
+        globalCaptcha: data.stats?.captcha?.globalModeActive ?? false,
+        trafficMetrics: data.metrics ? {
+          requestsPerMinute: data.metrics.requestsPerMinute ?? 0,
+          errorRate: data.metrics.errorRate ?? 0,
+          avgResponseTime: data.metrics.avgResponseTime ?? 0,
+          uniqueIps: data.metrics.uniqueIps ?? 0,
+        } : undefined as any,
+        recentEvents: (data.recentEvents || []).map((e: any) => ({
+          id: e.timestamp || Math.random().toString(),
+          type: e.type,
+          severity: e.severity,
+          message: `${e.type} from ${e.ip || 'unknown'}`,
+          ip: e.ip,
+          timestamp: e.timestamp,
+        })),
+      };
+
+      setDashboard(transformedData);
+      setEvents(transformedData.recentEvents || []);
       setError(null);
       setAccessDenied(false);
     } catch (err: any) {
