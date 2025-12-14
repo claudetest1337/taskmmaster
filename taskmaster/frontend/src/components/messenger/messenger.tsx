@@ -601,14 +601,16 @@ export function Messenger() {
     }
   }, [chatMessages.length, activeChatId]);
 
-  // Handle scroll to detect if user scrolled up
+  // Handle scroll to detect if user scrolled up - throttled with RAF
   const handleMessagesScroll = useCallback(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-    setIsUserScrolledUp(!isAtBottom);
+    requestAnimationFrame(() => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setIsUserScrolledUp(!isAtBottom);
+    });
   }, []);
 
   // Close chat menu when clicking outside
@@ -625,12 +627,21 @@ export function Messenger() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showChatMenu]);
 
-  // Check mobile view
+  // Check mobile view - throttled for performance
   useEffect(() => {
-    const checkMobile = () => setIsMobileView(window.innerWidth < 768);
+    let rafId: number;
+    const checkMobile = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setIsMobileView(window.innerWidth < 768);
+      });
+    };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const handleSendMessage = async () => {

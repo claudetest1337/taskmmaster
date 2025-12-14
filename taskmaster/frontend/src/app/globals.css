@@ -50,7 +50,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Enable smooth scrolling and GPU acceleration */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
+}
+
+/* Performance optimizations for animated elements */
+.animate-nebula,
+.animate-twinkle,
+.animate-float,
+.animate-pulse-glow {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout style paint;
 }
 
 /* Cosmic Stars Effect - GPU accelerated */
