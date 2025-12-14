@@ -113,8 +113,8 @@ const config: Config = {
           '50%': { opacity: '1', transform: 'scale(1.05)' },
         },
         'twinkle': {
-          '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
-          '50%': { opacity: '1', transform: 'scale(1.2)' },
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '1' },
         },
         'shooting-star': {
           '0%': { transform: 'translateX(0) translateY(0)', opacity: '1' },
@@ -122,8 +122,8 @@ const config: Config = {
           '100%': { transform: 'translateX(300px) translateY(300px)', opacity: '0' },
         },
         'nebula': {
-          '0%, 100%': { opacity: '0.3', transform: 'scale(1) rotate(0deg)' },
-          '50%': { opacity: '0.5', transform: 'scale(1.1) rotate(180deg)' },
+          '0%, 100%': { opacity: '0.3', transform: 'translate3d(0, 0, 0)' },
+          '50%': { opacity: '0.5', transform: 'translate3d(10px, -10px, 0)' },
         },
         'slide-up': {
           '0%': { transform: 'translateY(10px)', opacity: '0' },

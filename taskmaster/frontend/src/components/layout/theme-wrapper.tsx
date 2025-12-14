@@ -101,7 +101,7 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
           style={{ background: currentTheme.colors.backgroundGradient }}
         />
 
-        {/* Nebula effects - using blur-2xl for better performance */}
+        {/* Nebula effects - GPU accelerated for smooth 60fps */}
         <div
           className={cn(
             'absolute top-0 left-0 w-96 h-96 opacity-30 blur-2xl',
@@ -109,7 +109,9 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
           )}
           style={{
             background: `radial-gradient(circle, ${currentTheme.colors.glow1} 0%, transparent 70%)`,
-            willChange: animations ? 'transform' : 'auto',
+            willChange: animations ? 'transform, opacity' : 'auto',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
           }}
         />
         <div
@@ -120,7 +122,9 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
           style={{
             background: `radial-gradient(circle, ${currentTheme.colors.glow2} 0%, transparent 70%)`,
             animationDelay: '-10s',
-            willChange: animations ? 'transform' : 'auto',
+            willChange: animations ? 'transform, opacity' : 'auto',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
           }}
         />
         <div
@@ -131,7 +135,9 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
           style={{
             background: `radial-gradient(circle, ${currentTheme.colors.glow3} 0%, transparent 70%)`,
             animationDelay: '-5s',
-            willChange: animations ? 'transform' : 'auto',
+            willChange: animations ? 'transform, opacity' : 'auto',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
           }}
         />
 

@@ -53,7 +53,7 @@
   }
 }
 
-/* Cosmic Stars Effect */
+/* Cosmic Stars Effect - GPU accelerated */
 .stars {
   position: absolute;
   width: 100%;
@@ -70,12 +70,16 @@
   background-repeat: repeat;
   background-size: 350px 350px;
   animation: twinkle 4s ease-in-out infinite;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-/* Individual star twinkling animation - optimized for performance */
+/* Individual star twinkling animation - GPU accelerated */
 .star-twinkle {
   animation: starTwinkle ease-in-out infinite;
   will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @keyframes starTwinkle {
