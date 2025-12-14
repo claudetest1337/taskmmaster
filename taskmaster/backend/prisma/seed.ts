@@ -23,8 +23,7 @@ async function main() {
       firstName: 'Admin',
       lastName: 'User',
       role: 'ADMIN',
-      isActive: true,
-      isEmailVerified: true,
+      status: 'ACTIVE',
     },
   });
   console.log('✅ Created admin user:', admin.email);
@@ -38,9 +37,8 @@ async function main() {
       passwordHash: demoPassword,
       firstName: 'John',
       lastName: 'Doe',
-      role: 'USER',
-      isActive: true,
-      isEmailVerified: true,
+      role: 'EMPLOYEE',
+      status: 'ACTIVE',
     },
   });
   console.log('✅ Created user:', john.email);
@@ -54,9 +52,8 @@ async function main() {
       passwordHash: demoPassword,
       firstName: 'Jane',
       lastName: 'Smith',
-      role: 'USER',
-      isActive: true,
-      isEmailVerified: true,
+      role: 'EMPLOYEE',
+      status: 'ACTIVE',
     },
   });
   console.log('✅ Created user:', jane.email);
