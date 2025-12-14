@@ -101,10 +101,10 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
           style={{ background: currentTheme.colors.backgroundGradient }}
         />
 
-        {/* Nebula effects - GPU accelerated for smooth 60fps */}
+        {/* Nebula effects - reduced blur for better performance */}
         <div
           className={cn(
-            'absolute top-0 left-0 w-96 h-96 opacity-30 blur-2xl',
+            'absolute top-0 left-0 w-96 h-96 opacity-30 blur-lg',
             animations && 'animate-nebula'
           )}
           style={{
@@ -116,7 +116,7 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
         />
         <div
           className={cn(
-            'absolute bottom-0 right-0 w-96 h-96 opacity-30 blur-2xl',
+            'absolute bottom-0 right-0 w-96 h-96 opacity-30 blur-lg',
             animations && 'animate-nebula'
           )}
           style={{
@@ -129,7 +129,7 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
         />
         <div
           className={cn(
-            'absolute top-1/2 left-1/2 w-64 h-64 opacity-20 blur-2xl',
+            'absolute top-1/2 left-1/2 w-64 h-64 opacity-20 blur-lg',
             animations && 'animate-nebula'
           )}
           style={{

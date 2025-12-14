@@ -106,23 +106,21 @@
   }
 }
 
-/* Liquid Glass Effect - Dynamic with CSS Variables */
+/* Liquid Glass Effect - Optimized for performance (reduced blur) */
 .glass {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.05));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--glass-bg, rgba(10, 10, 26, 0.85));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, calc(var(--glass-opacity, 0.05) * 2));
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.3);
 }
 
 .glass-heavy {
-  background: var(--glass-bg-heavy, rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--glass-bg-heavy, rgba(10, 10, 26, 0.9));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, calc(var(--glass-opacity, 0.05) * 3));
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* Compact Mode Styles */
