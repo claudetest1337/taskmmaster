@@ -28,7 +28,6 @@ import {
   Building2,
   CalendarDays,
   MessagesSquare,
-  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore, useAuthHydration } from '@/stores/auth.store';
@@ -156,8 +155,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: t.nav.leaderboard, href: '/dashboard/leaderboard', icon: Trophy },
     { name: t.nav.analytics, href: '/dashboard/analytics', icon: BarChart3 },
     { name: t.nav.aiInsights, href: '/dashboard/ai', icon: Sparkles },
-    // Only show Security Dashboard for admin users
-    ...(isAdmin ? [{ name: t.nav.security || 'Security', href: '/dashboard/security', icon: Shield }] : []),
   ];
 
   const getNotificationIcon = (type: Notification['type']) => {
@@ -325,7 +322,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           <div className="flex-1 min-w-0" />
 
-          <div className="fixed top-3 right-4 sm:right-6 z-50 flex items-center gap-2 sm:gap-4 bg-glass-light/30 backdrop-blur-md border border-glass-border/30 rounded-xl px-2 py-1">
+          {/* Header actions - part of header flex layout, no blur for performance */}
+          <div className="flex items-center gap-2 sm:gap-4 bg-[rgba(30,30,50,0.8)] border border-white/10 rounded-xl px-2 py-1">
             {/* Messenger */}
             <Button
               variant="ghost"
@@ -466,7 +464,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page content - pt-16 accounts for fixed header height */}
-        <main className="flex-1 p-6 pt-20 overflow-auto">
+        <main
+          className="flex-1 p-6 pt-20 overflow-auto"
+          style={{
+            /* GPU acceleration for smooth scrolling */
+            transform: 'translateZ(0)',
+            willChange: 'scroll-position',
+            /* Prevent repaints during scroll */
+            contain: 'layout style',
+          }}
+        >
           {children}
         </main>
       </div>

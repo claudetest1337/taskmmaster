@@ -95,9 +95,9 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
     <div className={cn('min-h-screen', compactMode && 'compact-mode')}>
       {/* Dynamic Cosmic Background */}
       <div className="fixed inset-0 -z-10">
-        {/* Base gradient */}
+        {/* Base gradient - no transition for scroll performance */}
         <div
-          className="absolute inset-0 transition-all duration-500"
+          className="absolute inset-0"
           style={{ background: currentTheme.colors.backgroundGradient }}
         />
 

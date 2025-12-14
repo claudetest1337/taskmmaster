@@ -99,7 +99,8 @@ export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setStars(generateStars(60));
+    // Reduced from 60 to 20 stars for performance
+    setStars(generateStars(20));
     setMounted(true);
   }, []);
 
@@ -110,28 +111,21 @@ export default function LandingPage() {
         {/* Base gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-cosmic-darker via-cosmic-dark to-cosmic-darker" />
 
-        {/* Animated Stars */}
+        {/* Static Stars - no animation for performance */}
         {mounted && (
           <div className="absolute inset-0">
             {stars.map((star) => (
-              <motion.div
+              <div
                 key={star.id}
-                className="absolute rounded-full bg-white"
+                className="absolute rounded-full bg-white star-twinkle"
                 style={{
                   left: `${star.x}%`,
                   top: `${star.y}%`,
                   width: star.size,
                   height: star.size,
-                }}
-                animate={{
-                  opacity: [0.3, 1, 0.3],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: star.duration,
-                  delay: star.delay,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
+                  opacity: 0.6,
+                  animationDuration: `${star.duration}s`,
+                  animationDelay: `${star.delay}s`,
                 }}
               />
             ))}
@@ -167,7 +161,7 @@ export default function LandingPage() {
                 boxShadow: '0 0 12px 3px rgba(135, 206, 235, 0.8), 0 0 24px 6px rgba(65, 105, 225, 0.4)',
               }}
             />
-            {/* Comet tail */}
+            {/* Comet tail - no blur for performance */}
             <div
               className="absolute"
               style={{
@@ -178,46 +172,31 @@ export default function LandingPage() {
                 transform: 'translateY(-50%) rotate(35deg)',
                 transformOrigin: 'right center',
                 background: 'linear-gradient(to left, rgba(135, 206, 235, 0.8), rgba(65, 105, 225, 0.4), transparent)',
-                filter: 'blur(1px)',
                 borderRadius: '50% 0 0 50%',
               }}
             />
           </motion.div>
         )}
 
-        {/* Nebula clouds */}
-        <motion.div
-          className="absolute top-0 right-0 w-96 h-96 opacity-20"
+        {/* Nebula clouds - reduced blur for performance */}
+        <div
+          className="absolute top-0 right-0 w-96 h-96 opacity-25"
           style={{
-            background: 'radial-gradient(ellipse, rgba(147, 51, 234, 0.4) 0%, transparent 70%)',
-            filter: 'blur(40px)',
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
+            background: 'radial-gradient(ellipse, rgba(147, 51, 234, 0.5) 0%, transparent 70%)',
           }}
         />
-
-        <motion.div
+        {/* Second nebula cloud - static for performance */}
+        <div
+          className="absolute bottom-0 left-0 w-80 h-80 opacity-20"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(59, 130, 246, 0.4) 0%, transparent 70%)',
+          }}
+        />
+        {/* Third nebula cloud - static for performance */}
+        <div
           className="absolute bottom-0 left-1/3 w-80 h-80 opacity-15"
           style={{
             background: 'radial-gradient(ellipse, rgba(6, 182, 212, 0.4) 0%, transparent 70%)',
-            filter: 'blur(40px)',
-          }}
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 2,
           }}
         />
       </div>
