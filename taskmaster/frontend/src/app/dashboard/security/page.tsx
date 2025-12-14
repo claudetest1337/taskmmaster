@@ -488,6 +488,7 @@ export default function SecurityDashboardPage() {
             </motion.div>
 
             {/* Traffic Metrics */}
+            {dashboard.trafficMetrics && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -495,10 +496,10 @@ export default function SecurityDashboardPage() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
             >
               {[
-                { label: 'Requests/min', value: dashboard.trafficMetrics.requestsPerMinute, icon: Activity, color: 'text-cosmic-purple', suffix: '' },
-                { label: 'Error Rate', value: dashboard.trafficMetrics.errorRate, icon: XCircle, color: 'text-status-error', suffix: '%' },
-                { label: 'Avg Response', value: dashboard.trafficMetrics.avgResponseTime, icon: Clock, color: 'text-cosmic-cyan', suffix: 'ms' },
-                { label: 'Unique IPs', value: dashboard.trafficMetrics.uniqueIps, icon: Globe, color: 'text-yellow-500', suffix: '' },
+                { label: 'Requests/min', value: dashboard.trafficMetrics?.requestsPerMinute ?? 0, icon: Activity, color: 'text-cosmic-purple', suffix: '' },
+                { label: 'Error Rate', value: dashboard.trafficMetrics?.errorRate ?? 0, icon: XCircle, color: 'text-status-error', suffix: '%' },
+                { label: 'Avg Response', value: dashboard.trafficMetrics?.avgResponseTime ?? 0, icon: Clock, color: 'text-cosmic-cyan', suffix: 'ms' },
+                { label: 'Unique IPs', value: dashboard.trafficMetrics?.uniqueIps ?? 0, icon: Globe, color: 'text-yellow-500', suffix: '' },
               ].map((metric, i) => (
                 <Card key={i} className="glass">
                   <CardContent className="pt-6">
@@ -515,6 +516,7 @@ export default function SecurityDashboardPage() {
                 </Card>
               ))}
             </motion.div>
+            )}
 
             {/* Protection Level Controls & CAPTCHA */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

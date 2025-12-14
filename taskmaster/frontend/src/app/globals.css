@@ -72,21 +72,18 @@
   animation: twinkle 4s ease-in-out infinite;
 }
 
-/* Individual star twinkling animation */
+/* Individual star twinkling animation - optimized for performance */
 .star-twinkle {
   animation: starTwinkle ease-in-out infinite;
+  will-change: opacity;
 }
 
 @keyframes starTwinkle {
   0%, 100% {
     opacity: 0.3;
-    transform: scale(0.8);
-    filter: blur(0px);
   }
   50% {
     opacity: 1;
-    transform: scale(1.2);
-    filter: blur(0.5px);
   }
 }
 
@@ -257,12 +254,10 @@
   outline-offset: 2px;
 }
 
-/* Smooth transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
+/*
+ * Smooth transitions - REMOVED universal transition rule for performance
+ * Individual components should define their own transitions as needed
+ */
 
 /* Gradient text */
 .gradient-text {

@@ -245,60 +245,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   <item.icon className="w-5 h-5" />
                   <span className="font-medium">{item.name}</span>
-                  <AnimatePresence mode="wait">
-                    {isActive && (
-                      <motion.div
-                        key={item.href}
-                        className="absolute left-0 w-1.5 h-8 rounded-r-full"
-                        style={{
-                          background: 'linear-gradient(180deg, #8B5CF6 0%, #A855F7 50%, #8B5CF6 100%)',
-                        }}
-                        initial={{ opacity: 0, scaleY: 0.5 }}
-                        animate={{ opacity: 1, scaleY: 1 }}
-                        exit={{ opacity: 0, scaleY: 0.5 }}
-                        transition={{
-                          duration: 0.15,
-                          ease: 'easeOut',
-                        }}
-                      >
-                        {/* Breathing glow effect - soft and contained */}
-                        <motion.div
-                          className="absolute inset-0 rounded-r-full overflow-hidden"
-                          style={{
-                            background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.6) 0%, transparent 80%)',
-                          }}
-                          animate={{
-                            boxShadow: [
-                              '0 0 4px 1px rgba(139, 92, 246, 0.3)',
-                              '0 0 8px 2px rgba(139, 92, 246, 0.5)',
-                              '0 0 4px 1px rgba(139, 92, 246, 0.3)',
-                            ],
-                            opacity: [0.6, 1, 0.6],
-                          }}
-                          transition={{
-                            duration: 2.5,
-                            repeat: Infinity,
-                            ease: 'easeInOut',
-                          }}
-                        />
-                        {/* Inner glow pulse */}
-                        <motion.div
-                          className="absolute inset-0 rounded-r-full"
-                          style={{
-                            background: 'linear-gradient(180deg, #A855F7 0%, #8B5CF6 100%)',
-                          }}
-                          animate={{
-                            opacity: [0.8, 1, 0.8],
-                          }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                            ease: 'easeInOut',
-                          }}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Active indicator - simplified for performance */}
+                  {isActive && (
+                    <div
+                      className="absolute left-0 w-1.5 h-8 rounded-r-full"
+                      style={{
+                        background: 'linear-gradient(180deg, #8B5CF6 0%, #A855F7 50%, #8B5CF6 100%)',
+                        boxShadow: '0 0 8px 2px rgba(139, 92, 246, 0.5)',
+                      }}
+                    />
+                  )}
                 </Link>
               );
             })}

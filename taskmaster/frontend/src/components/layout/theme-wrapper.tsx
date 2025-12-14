@@ -9,15 +9,15 @@ interface ThemeWrapperProps {
   children: React.ReactNode;
 }
 
-// Twinkling stars component - client only
+// Twinkling stars component - client only (optimized: reduced from 80 to 30 stars)
 function TwinklingStarsClient({ animations, brightness }: { animations: boolean; brightness: number }) {
   const [stars] = useState(() =>
-    Array.from({ length: 80 }, (_, i) => ({
+    Array.from({ length: 30 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       size: Math.random() * 2 + 1,
-      duration: Math.random() * 3 + 2,
+      duration: Math.random() * 4 + 3, // Slower animation for better performance
       delay: Math.random() * 5,
       baseOpacity: Math.random() * 0.5 + 0.3,
     }))
@@ -41,7 +41,6 @@ function TwinklingStarsClient({ animations, brightness }: { animations: boolean;
             opacity: Math.min(star.baseOpacity * opacityMultiplier, 1),
             animationDuration: `${star.duration}s`,
             animationDelay: `${star.delay}s`,
-            boxShadow: `0 0 ${star.size * 2 * opacityMultiplier}px rgba(255, 255, 255, ${0.5 * opacityMultiplier})`,
           }}
         />
       ))}
@@ -102,32 +101,37 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
           style={{ background: currentTheme.colors.backgroundGradient }}
         />
 
-        {/* Nebula effects */}
+        {/* Nebula effects - using blur-2xl for better performance */}
         <div
           className={cn(
-            'absolute top-0 left-0 w-96 h-96 opacity-30 blur-3xl',
+            'absolute top-0 left-0 w-96 h-96 opacity-30 blur-2xl',
             animations && 'animate-nebula'
           )}
-          style={{ background: `radial-gradient(circle, ${currentTheme.colors.glow1} 0%, transparent 70%)` }}
+          style={{
+            background: `radial-gradient(circle, ${currentTheme.colors.glow1} 0%, transparent 70%)`,
+            willChange: animations ? 'transform' : 'auto',
+          }}
         />
         <div
           className={cn(
-            'absolute bottom-0 right-0 w-96 h-96 opacity-30 blur-3xl',
+            'absolute bottom-0 right-0 w-96 h-96 opacity-30 blur-2xl',
             animations && 'animate-nebula'
           )}
           style={{
             background: `radial-gradient(circle, ${currentTheme.colors.glow2} 0%, transparent 70%)`,
             animationDelay: '-10s',
+            willChange: animations ? 'transform' : 'auto',
           }}
         />
         <div
           className={cn(
-            'absolute top-1/2 left-1/2 w-64 h-64 opacity-20 blur-3xl',
+            'absolute top-1/2 left-1/2 w-64 h-64 opacity-20 blur-2xl',
             animations && 'animate-nebula'
           )}
           style={{
             background: `radial-gradient(circle, ${currentTheme.colors.glow3} 0%, transparent 70%)`,
             animationDelay: '-5s',
+            willChange: animations ? 'transform' : 'auto',
           }}
         />
 
